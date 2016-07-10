@@ -1,0 +1,16 @@
+{
+  "name": "sockettest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^4.5.3",
+    "socket.io": "^1.4.8"
+  }
+}

@@ -1,0 +1,63 @@
+
+main {
+  display: inline-block;
+  width: 60vw;
+}
+
+textarea {
+  display: inline-block;
+  margin: auto;
+  width: 60%;
+  height: 3em;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+#send {
+  display: inline-block;
+  margin: auto;
+  width: 30%;
+  height: 3em;
+}
+
+#messaging {
+  display: inline;
+  height: 90vh;
+  width: 33vw;
+  float: right;
+  margin: 15px;
+  border: 2px solid black;
+}
+
+#chatLog {
+  height:75%;
+  width:100%;
+  border: 1px solid black;
+  overflow: auto;
+}
+
+.message {
+  padding: 2px;
+  padding-bottom: 0px;
+}
+
+#packSelection {
+  display: none;
+}
+
+.packCard {
+}
+
+.packCard:hover {
+  z-index: 100;
+  transform: scale(1.5);
+}
+
+.pickedCard:hover {
+  z-index: 100;
+  transform: scale(1.5);
+}
+
+#selectedCard {
+  border: 5px solid #00ac0c;
+}

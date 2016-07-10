@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+  <head>
+    <meta charset="utf-8">
+    <title>SocketIO Test</title>
+    <link rel="stylesheet" href="style.css" media="screen" title="no title" charset="utf-8">
+  </head>
+  <body>
+
+
+    <main>
+    <h1>Henry's Daft Draft</h1>
+
+    <div ng-controller='gameController' id='packSelection'>
+      <label>Select packs to play with:</label></br>
+      <select ng-model="packOne">
+        <option ng-repeat="set in dropDown">{{set}}</option>
+      </select></br>
+      <select ng-model="packTwo">
+        <option ng-repeat="set in dropDown">{{set}}</option>
+      </select><button type="button" ng-click='getPacks()'>Make Packs</button></br>
+      <select ng-model="packThree">
+        <option ng-repeat="set in dropDown">{{set}}</option>
+      </select></br>
+    </div>
+
+    <div ng-controller='playController' id="playArea">
+      <h2>Current Pack</h2>
+      <img class='packCard' ng-click='pickCard($event, $index)' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{card.multiverseid}} + &type=card" ng-repeat="card in currentPack track by $index"/>
+
+      <h2>My Picks:</h2>
+      <img class='pickedCard' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{myCard.multiverseid}} + &type=card" ng-repeat="myCard in myPicks track by $index"/>
+
+    </div>
+
+    </main>
+
+
+    <div ng-controller="messageController" id="messaging">
+
+      <div id="chatLog">
+        <div ng-repeat = "message in messageLog track by $index">
+          <div class="message">{{message}}</div>
+        </div>
+      </div>
+
+      <div>
+        <input style="display: block; margin-left: 30px" type="text" ng-model="username" placeholder="Username">
+        <textarea type="text" ng-model="msgIn"></textarea>
+        <button id="send" type="button" ng-click="sendMsg()">Send</button>
+      </div>
+
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="scripts/script.js" charset="utf-8"></script>
+  </body>
+</html>
