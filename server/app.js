@@ -63,10 +63,8 @@ app.post( '/getPacks', function(req, res){
     for(var i=0; i<connectedUsers.length; i++){
       io.to(connectedUsers[i].id).emit('packEmit', allPacks[0][i]);
     }
-
-    //Make sure that this is not visible to the client in the final product!!!
-    // res.send(200);
-    res.send(allPacks);
+    allPacks.splice(0,1);
+    res.sendStatus(200);
 
   });//End Then
 });//End POST
@@ -88,13 +86,29 @@ io.on('connection', function(socket){
     }
   });
 
-  socket.on('pack recieved', function(){
+  socket.on('pack received', function(){
     for (var i=0; i<connectedUsers.length; i++){
       if (connectedUsers[i].id == socket.id){
         connectedUsers[i].status = "Busy";
         console.log(connectedUsers[i].id + " is now Busy.");
       }
     }
+  });
+
+  socket.on('user seated', function(userName){
+    var userSeats = [];
+    for (var i=0; i<connectedUsers.length; i++){
+      if (socket.id == connectedUsers[i].id){
+        connectedUsers[i].name = userName;
+        connectedUsers[i].status = "Seated"
+      }
+      if (connectedUsers[i].name == undefined){
+        userSeats.push("Not Seated");
+      } else {
+        userSeats.push(connectedUsers[i].name);
+      }
+    }
+    io.emit('new seat', userSeats)
   });
 
   socket.on('chat message', function(msg){
@@ -111,10 +125,10 @@ io.on('connection', function(socket){
 
         //Find nextUser and send the pack
         var nextUser;
-        if (connectedUsers[i+1] == undefined){
-          nextUser = connectedUsers[0];
+        if ((i+1) == connectedUsers.length){
+          nextUser = connectedUsers[0].id;
         } else {
-          nextUser = connectedUsers[i+1];
+          nextUser = connectedUsers[i+1].id;
         }
         tempPacks.push({user: nextUser, pack: pack});
       }
@@ -122,17 +136,56 @@ io.on('connection', function(socket){
   });
 
   socket.on('check for pack', function(){
-    console.log(socket.id + " is looking for the next pack.");
     if (tempPacks[0] !== undefined){
-      for (var i=0; i<connectedUsers.length; i++){
+      for (var i=0; i<tempPacks.length; i++){
         if (tempPacks[i].user == socket.id){
-          console.log("Pack found");
+          //Pack is found
           io.to(socket.id).emit('packEmit', tempPacks[i].pack);
+          tempPacks.splice(i,1);
           return true;
         }
       }
     }
     return false;
+  });
+
+  socket.on('pack done', function(){
+    //Set this users status to "Next Pack"
+    for (var i=0; i<connectedUsers.length; i++){
+      if(connectedUsers[i].id == socket.id){
+        connectedUsers[i].status = "Next Pack";
+      }
+    }
+
+    //See if there are more packs after
+    if(allPacks.length == 0){
+      //Do something here
+      console.log("All Packs Drafted!");
+      io.emit('draft done', true);
+
+    } else {
+      //Continue
+      //See if all users are ready for Next Pack
+      var usersReady = 0;
+      for (var i=0; i<connectedUsers.length; i++){
+      if (connectedUsers[i].status == "Next Pack"){
+          usersReady++;
+        }
+      }
+
+      //If all users are ready for Next Pack
+      if (usersReady==connectedUsers.length){
+        //Reverse pack direction
+        connectedUsers.reverse();
+        //Send packs to the clients
+        for(var i=0; i<connectedUsers.length; i++){
+          io.to(connectedUsers[i].id).emit('packEmit', allPacks[0][i]);
+        }
+        allPacks.splice(0,1);
+      }
+
+    }
+
   });
 
 });//End socket connect
@@ -143,19 +196,6 @@ http.listen(3000, function(){
 
 var makePacks = function(playSet, packNumber){
   console.log("Making pack " + (packNumber+1) + " from " + playSet.name);
-
-  //Used to ensure every card in a pack is unique
-  var isUnique = function(array, createdPack){
-    var card = array[Math.floor(Math.random() * (array.length+1))];
-    for (var index; index<createdPack.length; index++){
-      if (createdPack[index] == card){
-        console.log("Not unique");
-        return isUnique(array);
-      }
-    }
-    // console.log("pushing unique card " + card);
-    return card;
-  };//End isUnique
 
   //Holds all packs for current round of packs
   var currentPacks = [];
@@ -192,6 +232,17 @@ var makePacks = function(playSet, packNumber){
     }
   }//End Rarity for
 
+  //Used to ensure every card in a pack is unique
+  var isUnique = function(array, createdPack){
+    var card = array[Math.floor(Math.random() * (array.length))];
+    if (createdPack.indexOf(card) == -1){
+      //The card is unique
+      return card;
+    } else {
+      //The card is not unique, try again
+      return isUnique(array, createdPack);
+    }
+  };//End isUnique
 
   //Pack Creation
   for (var i=0; i<connectedUsers.length; i++){

@@ -3,35 +3,48 @@
   <head>
     <meta charset="utf-8">
     <title>SocketIO Test</title>
+    <link rel="stylesheet" href="./scripts/vendor/css/bootstrap.css" media="screen" title="no title" charset="utf-8">
     <link rel="stylesheet" href="style.css" media="screen" title="no title" charset="utf-8">
   </head>
   <body>
-
+    <h1>Henry's Draft</h1>
 
     <main>
-    <h1>Henry's Daft Draft</h1>
+      <div class="panel panel-primary" ng-controller='gameController' id='packSelection'>
+        <div class='panel-heading'>
+          <div class='panel-title'>Select packs to play with:</div>
+        </div>
+        <div id='packAlert' class='alert alert-danger' role='alert'>Make sure you have selected each pack!</div>
+        <button style="margin: 10px" class="btn btn-primary" type="button" ng-click='getPacks()'>Make Packs</button>
+        <select class='form-control' ng-model="packOne">
+          <option selected="$index" ng-repeat="set in dropDown">{{set}}</option>
+        </select>
+        <select class='form-control' ng-model="packTwo">
+          <option ng-selected="$index" class='form-control' ng-repeat="set in dropDown">{{set}}</option>
+        </select>
+        <select class='form-control' ng-model="packThree">
+          <option ng-selected="$index" ng-repeat="set in dropDown">{{set}}</option>
+        </select>
+      </div>
 
-    <div ng-controller='gameController' id='packSelection'>
-      <label>Select packs to play with:</label></br>
-      <select ng-model="packOne">
-        <option ng-repeat="set in dropDown">{{set}}</option>
-      </select></br>
-      <select ng-model="packTwo">
-        <option ng-repeat="set in dropDown">{{set}}</option>
-      </select><button type="button" ng-click='getPacks()'>Make Packs</button></br>
-      <select ng-model="packThree">
-        <option ng-repeat="set in dropDown">{{set}}</option>
-      </select></br>
-    </div>
+      <div ng-controller='playController' id="playArea">
 
-    <div ng-controller='playController' id="playArea">
-      <h2>Current Pack</h2>
-      <img class='packCard' ng-click='pickCard($event, $index)' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{card.multiverseid}} + &type=card" ng-repeat="card in currentPack track by $index"/>
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <div class='panel-title'>Current Pack:</div>
+          </div>
+          <img class='packCard' ng-click='pickCard($event, $index)' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{card.multiverseid}} + &type=card" ng-repeat="card in currentPack track by $index"/>
+        </div>
 
-      <h2>My Picks:</h2>
-      <img class='pickedCard' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{myCard.multiverseid}} + &type=card" ng-repeat="myCard in myPicks track by $index"/>
 
-    </div>
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <div class='panel-title'>My Picks:</div>
+          </div>
+          <img class='pickedCard' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{myCard.multiverseid}} + &type=card" ng-repeat="myCard in myPicks track by $index"/>
+        </div>
+
+      </div>
 
     </main>
 
@@ -44,16 +57,46 @@
         </div>
       </div>
 
-      <div>
-        <input style="display: block; margin-left: 30px" type="text" ng-model="username" placeholder="Username">
-        <textarea type="text" ng-model="msgIn"></textarea>
-        <button id="send" type="button" ng-click="sendMsg()">Send</button>
+      <div id='msgControls'>
+
+        <div id='seating'>
+          <div class="alert alert-warning" role="alert">Please take a seat:</div>
+          <input type="text" ng-model="username" placeholder="Username">
+          <button class='btn btn-success' type="button" ng-click='takeSeat()'>Join</button>
+        </div>
+
+        <div id='messageEnter' class='input-group'>
+          <textarea class='form-control' type="text" ng-model="msgIn" ng-keypress="chatEnter($event)"></textarea>
+          <button id="send" class='btn btn-primary' type="button" ng-click="sendMsg()">Send</button>
+          <button id="userList" class='btn btn-info' data-toggle="modal" data-target="#userModal" type="button"><span class="glyphicon glyphicon-user" aria-hidden='true'></span></button>
+        </div>
+
+        <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="userModalLabel">Users:</h4>
+              </div>
+              <div class="modal-body">
+                <ul>
+                  <li ng-repeat='user in userSeats track by $index'>{{user}}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="./scripts/vendor/js/bootstrap.js" charset="utf-8"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="scripts/script.js" charset="utf-8"></script>
   </body>

@@ -2,38 +2,55 @@
 main {
   display: inline-block;
   width: 60vw;
+  margin: 2vw;
+}
+
+#packAlert {
+  display: none;
+}
+
+input {
+  height: 5vh;
+  margin-top: 1vh;
+  margin-left: 5px;
 }
 
 textarea {
-  display: inline-block;
-  margin: auto;
-  width: 60%;
-  height: 3em;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  resize: vertical;
 }
 
 #send {
-  display: inline-block;
-  margin: auto;
-  width: 30%;
-  height: 3em;
+  margin: 5px;
+  width: 75%;
+}
+
+#userList {
+  margin: 5px;
+  width: 15%;
+  float: right;
 }
 
 #messaging {
   display: inline;
-  height: 90vh;
-  width: 33vw;
+  width: 25vw;
   float: right;
-  margin: 15px;
+  margin: 2vw;
   border: 2px solid black;
 }
 
+.alert-warning {
+  margin-bottom: 0px;
+}
+
+#input {
+
+}
+
 #chatLog {
-  height:75%;
+  height:75vh;
   width:100%;
   border: 1px solid black;
-  overflow: auto;
+  overflow-y: auto;
 }
 
 .message {
@@ -41,11 +58,19 @@ textarea {
   padding-bottom: 0px;
 }
 
-#packSelection {
+#messageEnter {
   display: none;
 }
 
+#packSelection {
+  display: none;
+  margin-bottom: 10vh;
+}
+
 .packCard {
+}
+
+.pickedCard {
 }
 
 .packCard:hover {
