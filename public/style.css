@@ -1,18 +1,31 @@
 
+h1 {
+  margin-left: 5vw;
+}
+
+img {
+  margin: 2px;
+}
+
 main {
   display: inline-block;
   width: 60vw;
   margin: 2vw;
 }
 
-#packAlert {
+#draftContent, #postDraftContent, #packAlert, #statusAlert, #messageEnter {
   display: none;
+}
+
+#status {
+  font-weight: bold;
+  color: #db2222;
 }
 
 input {
   height: 5vh;
-  margin-top: 1vh;
-  margin-left: 5px;
+  margin: 1vh;
+  width: 65%;
 }
 
 textarea {
@@ -36,21 +49,20 @@ textarea {
   float: right;
   margin: 2vw;
   border: 2px solid black;
+  border-radius: 10px;
+  background-color: #FFF;
 }
 
 .alert-warning {
   margin-bottom: 0px;
 }
 
-#input {
-
-}
-
 #chatLog {
-  height:75vh;
+  height:65vh;
   width:100%;
   border: 1px solid black;
   overflow-y: auto;
+  border-radius: 8px;
 }
 
 .message {
@@ -58,8 +70,8 @@ textarea {
   padding-bottom: 0px;
 }
 
-#messageEnter {
-  display: none;
+.panel-info, .panel-primary, .panel-warning {
+  box-shadow: 2px 2px 10px;
 }
 
 #packSelection {
@@ -67,20 +79,13 @@ textarea {
   margin-bottom: 10vh;
 }
 
-.packCard {
-}
-
-.pickedCard {
-}
-
-.packCard:hover {
+.packCard:hover, .pickedCard:hover, .mainBoard:hover, .sideBoard:hover {
   z-index: 100;
   transform: scale(1.5);
 }
 
-.pickedCard:hover {
-  z-index: 100;
-  transform: scale(1.5);
+.panelContent {
+  margin: 15px;
 }
 
 #selectedCard {

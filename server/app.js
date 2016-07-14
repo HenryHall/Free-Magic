@@ -77,14 +77,28 @@ io.on('connection', function(socket){
     io.to(connectedUsers[0].id).emit('initialize', true);
   }
 
+  //Let the chat know
+  var msg = "A new user has connected.";
+  io.emit('chat message', msg);
+
+  //Set status to not ready
+  io.emit('all seated', false);
+
   socket.on('disconnect', function(){
     console.log('User ' + socket.id + ' disconnected');
+    var userSeats = [];
     for(var i=0; i<connectedUsers.length; i++){
       if (connectedUsers[i].id ==  socket.id){
+        var msg = connectedUsers[i].name + " has disconnect.";
+        io.emit('chat message', msg);
         connectedUsers.splice(i,1);
+      } else {
+        userSeats.push(connectedUsers[i].name);
       }
     }
+    io.emit('new seat', userSeats);
   });
+
 
   socket.on('pack received', function(){
     for (var i=0; i<connectedUsers.length; i++){
@@ -103,12 +117,21 @@ io.on('connection', function(socket){
         connectedUsers[i].status = "Seated"
       }
       if (connectedUsers[i].name == undefined){
-        userSeats.push("Not Seated");
+        userSeats.push("User not seated");
       } else {
         userSeats.push(connectedUsers[i].name);
       }
     }
-    io.emit('new seat', userSeats)
+
+    var isSeated = function(element, index, array){
+      return element != "User not seated";
+    }
+    //Check to see if every user is seated
+    if (userSeats.every(isSeated)) {
+      io.emit('all seated', true);
+    }
+
+    io.emit('new seat', userSeats);
   });
 
   socket.on('chat message', function(msg){
@@ -258,7 +281,7 @@ var makePacks = function(playSet, packNumber){
       userPack.push(isUnique(uncommons, userPack));
     }
     //Decided if rare is mythic
-    if ((Math.random() * (8 - 1) + 1) == 8){
+    if ((Math.floor(Math.random() * (8 - 1) + 1)) == 1){
       //Make sure the set has mythic rares
       if(mythics.length>0){
         userPack.push(isUnique(mythics, userPack));

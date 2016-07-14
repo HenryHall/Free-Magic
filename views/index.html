@@ -7,43 +7,99 @@
     <link rel="stylesheet" href="style.css" media="screen" title="no title" charset="utf-8">
   </head>
   <body>
-    <h1>Henry's Draft</h1>
+    <div class="page-header">
+      <h1>Henry's Draft <small>FREE MAGIC!</small></h1>
+    </div>
+
 
     <main>
       <div class="panel panel-primary" ng-controller='gameController' id='packSelection'>
+
         <div class='panel-heading'>
           <div class='panel-title'>Select packs to play with:</div>
         </div>
-        <div id='packAlert' class='alert alert-danger' role='alert'>Make sure you have selected each pack!</div>
-        <button style="margin: 10px" class="btn btn-primary" type="button" ng-click='getPacks()'>Make Packs</button>
-        <select class='form-control' ng-model="packOne">
-          <option selected="$index" ng-repeat="set in dropDown">{{set}}</option>
-        </select>
-        <select class='form-control' ng-model="packTwo">
-          <option ng-selected="$index" class='form-control' ng-repeat="set in dropDown">{{set}}</option>
-        </select>
-        <select class='form-control' ng-model="packThree">
-          <option ng-selected="$index" ng-repeat="set in dropDown">{{set}}</option>
-        </select>
+
+        <div class='panelContent'>
+          <div id='statusAlert' class='alert alert-danger' role='alert'>Make sure each player has taken their seat!</div>
+          <div id='packAlert' class='alert alert-danger' role='alert'>Make sure you have selected each pack!</div>
+          <button style="margin: 10px" class="btn btn-primary" type="button" ng-click='getPacks()'>Make Packs</button>
+          <span>Player Status: <span id='status'>{{userStatus}}</span></span>
+
+          <select class='form-control' ng-model="packOne">
+            <option ng-repeat="set in dropDown">{{set}}</option>
+          </select>
+          <select class='form-control' ng-model="packTwo">
+            <option class='form-control' ng-repeat="set in dropDown">{{set}}</option>
+          </select>
+          <select class='form-control' ng-model="packThree">
+            <option ng-repeat="set in dropDown">{{set}}</option>
+          </select>
+        </div>
+
       </div>
 
       <div ng-controller='playController' id="playArea">
 
-        <div class="panel panel-info">
-          <div class="panel-heading">
-            <div class='panel-title'>Current Pack:</div>
+        <div id="draftContent">
+
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <div class='panel-title'>Current Pack:</div>
+            </div>
+            <div class='panelContent'>
+              <img class='packCard' ng-click='pickCard($event, $index)' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{card.multiverseid}} + &type=card" ng-repeat="card in currentPack track by $index"/>
+            </div>
           </div>
-          <img class='packCard' ng-click='pickCard($event, $index)' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{card.multiverseid}} + &type=card" ng-repeat="card in currentPack track by $index"/>
+
+
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <div class='panel-title'>My Picks:</div>
+            </div>
+            <div class='panelContent'>
+              <img class='pickedCard' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{myCard.multiverseid}} + &type=card" ng-repeat="myCard in myPicks track by $index"/>
+            </div>
+          </div>
+
         </div>
 
 
-        <div class="panel panel-info">
-          <div class="panel-heading">
-            <div class='panel-title'>My Picks:</div>
-          </div>
-          <img class='pickedCard' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{myCard.multiverseid}} + &type=card" ng-repeat="myCard in myPicks track by $index"/>
-        </div>
+          <div id='postDraftContent'>
 
+            <div class="panel panel-primary">
+              <div class="panel-heading">
+                <div class="panel-title">Draft Complete!</div>
+              </div>
+              <div class='panelContent' style='margin: 15px; text-align: center;'>
+                <p>You've finished drafting!  Create your deck by moving cards to and from your sideboard and mainboard.  Once you have completed deckbuilding, click 'Submit Decklist' and your deck will be copied to your clipboard.  Then, paste the decklist into your favorite online magic application such as Cockatrice or Magic Workstation.  You can click 'Pairings' to see who you are paired with.<br/><br/><strong>Thanks for using Henry's Draft!</strong></p>
+                <button style='margin: 15px;' type="button" class='btn btn-primary' ng-click='submitDecklist()'>Submit Decklist</button>
+                <button style='margin: 15px;' type="button" class='btn btn-info' ng-click='pairings()'>Pairings</button>
+              </div>
+
+            </div>
+
+            <div class="panel panel-info">
+              <div class="panel-heading">
+                <div class='panel-title'>Mainboard:</div>
+              </div>
+              <div class='panelContent'>
+                <img class='mainBoard' ng-click='deckCard($event, $index)' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{myCard.multiverseid}} + &type=card" ng-repeat="myCard in myMainboard track by $index"/>
+              </div>
+            </div>
+
+
+            <div class="panel panel-warning">
+              <div class="panel-heading">
+                  <div class="panel-title">Sideboard:</div>
+              </div>
+              <div class='panelContent'>
+                <img class='sideBoard' ng-click='deckCard($event, $index)' ng-scr="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{myCard.multiverseid}} + &type=card" ng-repeat="myCard in mySideboard track by $index"/>
+              </div>
+            </div>
+
+          </div>
+
+      <!-- End playController -->
       </div>
 
     </main>
@@ -52,6 +108,7 @@
     <div ng-controller="messageController" id="messaging">
 
       <div id="chatLog">
+        <div class="alert alert-info" role="alert">Chatting as: {{username}}</div>
         <div ng-repeat = "message in messageLog track by $index">
           <div class="message">{{message}}</div>
         </div>
@@ -60,8 +117,8 @@
       <div id='msgControls'>
 
         <div id='seating'>
-          <div class="alert alert-warning" role="alert">Please take a seat:</div>
-          <input type="text" ng-model="username" placeholder="Username">
+          <div style="font-size: 1.5em" class="alert alert-warning" role="alert">Please take a seat:</div>
+          <input type="text" ng-model="username" placeholder="Player Name">
           <button class='btn btn-success' type="button" ng-click='takeSeat()'>Join</button>
         </div>
 
@@ -78,7 +135,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="userModalLabel">Users:</h4>
+                <h4 class="modal-title" id="userModalLabel">Players <span class="badge">{{userCount}}</span></h4>
               </div>
               <div class="modal-body">
                 <ul>
