@@ -13,7 +13,7 @@ main {
   margin: 2vw;
 }
 
-#draftContent, #postDraftContent, #packAlert, #statusAlert, #messageEnter {
+#draftContent, #postDraftContent, #packAlert, #statusAlert, #messageEnter, #welcome, #packSelection {
   display: none;
 }
 
@@ -45,6 +45,7 @@ textarea {
 
 #messaging {
   display: inline;
+  position: fixed;
   width: 25vw;
   float: right;
   margin: 2vw;
@@ -62,7 +63,8 @@ textarea {
   width:100%;
   border: 1px solid black;
   overflow-y: auto;
-  border-radius: 8px;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
 }
 
 .message {
@@ -70,12 +72,11 @@ textarea {
   padding-bottom: 0px;
 }
 
-.panel-info, .panel-primary, .panel-warning {
+.panel {
   box-shadow: 2px 2px 10px;
 }
 
 #packSelection {
-  display: none;
   margin-bottom: 10vh;
 }
 
@@ -86,8 +87,43 @@ textarea {
 
 .panelContent {
   margin: 15px;
+  text-align: center;
 }
 
 #selectedCard {
   border: 5px solid #00ac0c;
+}
+
+.mana {
+  margin: 15px;
+  height: 160px;
+  width: 160px;
+  border-radius: 50%;
+  font-size: 7em;
+  color: red;
+  border: none;
+}
+
+.mana:hover {
+  border: 4px solid black;
+}
+
+#plain {
+  background-image: url('./images/plain.png');
+}
+
+#island {
+  background-image: url('./images/island.png');
+}
+
+#swamp {
+  background-image: url('./images/swamp.png');
+}
+
+#mountain {
+  background-image: url('./images/mountain.png');
+}
+
+#forest {
+  background-image: url('./images/forest.png');
 }

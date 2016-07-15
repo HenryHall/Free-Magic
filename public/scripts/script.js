@@ -4,13 +4,20 @@ var status= 'false';
 var socket = io();
 var myApp=angular.module( 'myApp', [] );
 
+
 myApp.controller( 'gameController', ['$scope', '$http', function($scope, $http){
 
   $scope.userStatus = "Not Ready";
+  $scope.usersReady = 0;
+  $scope.totalUsers = 0;
 
   //Server decides who is the first user and allows access to pack selection
   socket.on('initialize', function(){
     document.getElementById('packSelection').style.display = "block";
+  });
+
+  socket.on('welcome', function(){
+    document.getElementById('welcome').style.display = "block";
   });
 
   socket.on('all seated', function(bool){
@@ -23,6 +30,7 @@ myApp.controller( 'gameController', ['$scope', '$http', function($scope, $http){
     } else {
       console.log("Not every player is seated");
       $scope.userStatus = "Not Ready"
+      $scope.totalUsers++;
       status = 'false';
       document.getElementById('status').style.color = '#db2222';
       $scope.$apply();
@@ -30,6 +38,27 @@ myApp.controller( 'gameController', ['$scope', '$http', function($scope, $http){
     return status;
 
   });
+
+  socket.on('new seat', function(seats){
+    $scope.usersReady = 0;
+    for (var i=0; i<seats.length; i++){
+      if (seats[i] !== "User not seated"){
+        $scope.usersReady++;
+      }
+    }
+    $scope.totalUsers = seats.length;
+
+    var isSeated = function(element, index, array){
+      return element != "User not seated";
+    }
+    if (seats.every(isSeated)) {
+      $scope.userStatus = "Ready";
+      status = 'true';
+      document.getElementById('status').style.color = '#05cd4f';
+    }
+  });
+
+  socket.on('user seated')
 
   $http({
     method: 'GET',
@@ -82,7 +111,6 @@ myApp.controller( 'messageController', ['$scope', function($scope){
   $scope.msgIn = '';
   $scope.username = "";
   var seatName;
-  $scope.userCount;
 
   $scope.takeSeat = function(){
     if ($scope.username == ""){
@@ -103,7 +131,13 @@ myApp.controller( 'messageController', ['$scope', function($scope){
       $scope.sendMsg();
       $scope.msgIn = '';
     }
-  }
+  };
+
+  $scope.nameEnter = function(key){
+    if(key.which == 13){
+      $scope.takeSeat();
+    }
+  };
 
 
   $scope.sendMsg = function(){
@@ -114,37 +148,36 @@ myApp.controller( 'messageController', ['$scope', function($scope){
   };
 
 
-  socket.on('new seat', function(seats){
-    console.log("New Seat");
-    $scope.userSeats = seats;
-    $scope.userCount = seats.length;
-    $scope.$apply();
-    return true;
-  });
-
-
   socket.on('chat message', function(msg){
-
+    console.log("Here");
     $scope.messageLog.push(msg);
     $scope.$apply();
     document.getElementById('chatLog').scrollTop = document.getElementById('chatLog').scrollHeight;
-    return true;
   });
 
 }]);//End messageController
 
-myApp.controller( 'playController', ['$scope', '$timeout', function($scope, $timeout){
+myApp.controller( 'playController', ['$scope', function($scope){
 
   $scope.currentPack = [];
   $scope.myPicks = [];
   $scope.myMainboard = [];
   $scope.mySideboard = [];
 
+  $scope.plains = 0;
+  $scope.islands = 0;
+  $scope.swamps = 0;
+  $scope.mountains = 0;
+  $scope.forests = 0;
+  $scope.landCount = 0;
+
+
   socket.on('packEmit', function(pack){
     //Set user's status to "Busy"
     socket.emit('pack received', true);
 
     //Make sure the users can see the cards!
+    document.getElementById('welcome').style.display ="none";
     document.getElementById('draftContent').style.display = "block";
 
     $scope.currentPack = pack;
@@ -159,7 +192,6 @@ myApp.controller( 'playController', ['$scope', '$timeout', function($scope, $tim
     $scope.myMainboard = $scope.myPicks;
     $scope.$apply();
     return true;
-
   });
 
   $scope.pickCard = function(e, cardIndex){
@@ -170,37 +202,132 @@ myApp.controller( 'playController', ['$scope', '$timeout', function($scope, $tim
         document.getElementById('selectedCard').id = "";
       }
       thisCard.id = "selectedCard";
-    } else {
-      //Pick the selectedCard
-      $scope.myPicks.push($scope.currentPack[cardIndex]);
-      $scope.currentPack.splice(cardIndex,1);
+      return true;
+    }
 
-      //Check if the pack is depleted
-      if ($scope.currentPack.length == 0){
-        socket.emit('pack done', true);
+    //Pick the selectedCard
+    $scope.myPicks.push($scope.currentPack[cardIndex]);
+    $scope.currentPack.splice(cardIndex,1);
+
+    //Check if the pack is depleted
+    if ($scope.currentPack.length == 0){
+      socket.emit('pack done', true);
+      return true;
+    }
+
+    //Send the pack back to the server
+    var packToPass = $scope.currentPack;
+    socket.emit('packPass', packToPass);
+    $scope.currentPack = null;
+
+    //Wait for the next pack, checking every second
+    console.log("Checking for a new pack.");
+    var timer = setInterval(function(){
+      if ($scope.currentPack !== null) {
+        console.log("New pack is ready!");
+        clearInterval(timer);
+        return true;
       } else {
-        //Send the pack back to the server
-        var packToPass = $scope.currentPack;
-        socket.emit('packPass', packToPass);
-        $scope.currentPack = null;
+        socket.emit('check for pack', true);
+        console.log("Pack is not ready.");
+        return false;
+      }
+    },1000);
 
-        //Wait for the next pack, checking every second
-        console.log("Checking for a new pack.");
-        var timer = setInterval(function(){
-          if ($scope.currentPack !== null) {
-            console.log("New pack is ready!");
-            clearInterval(timer);
-            return true;
-          } else {
-            socket.emit('check for pack', true);
-            console.log("Pack is not ready.");
-            return false;
-          }
-        },1000);
-      }//End pack depleted else
+    return true;
+  };//End pickCard
 
-    }//End else
-  }//End pickCard
+  //Hash the decklist
+  $scope.submitDecklist = function(){
+    var mainboardToHash;
+    var sideboardToHash;
+    var finalToHash;
+
+    for (var i=0; i<$scope.myMainboard.length; i++){
+      mainboardToHash += $scope.myMainboard[i].name.toLowerCase() + ";";
+    }
+
+    for (var i=0; i<$scope.mySideboard.length; i++){
+      sideboardToHash += "SB:" + $scope.mySideboard[i].name.toLowerCase() + ";";
+    }
+
+    for (var i=0; i<$scope.plains; i++){
+      mainboardToHash += "plain;";
+    }
+    for (var i=0; i<$scope.islands; i++){
+      mainboardToHash += "islands;";
+    }
+    for (var i=0; i<$scope.swamps; i++){
+      mainboardToHash += "swamps;";
+    }
+    for (var i=0; i<$scope.mountains; i++){
+      mainboardToHash += "mountain;";
+    }
+    for (var i=0; i<$scope.forests; i++){
+      mainboardToHash += "forest;";
+    }
+
+    finalToHash = sideboardToHash + mainboardToHash;
+
+    //Remove the last ";"
+    finalToHash = finalToHash.substring(0, finalToHash.length-1);
+    finalToHash.utf8Encode();
+    console.log(finalToHash);
+
+    // socket.emit('hash', finalToHash);
+  };
+
+  // socket.on('received hash', newHash){
+  //
+  // }
+
+
+  $scope.manaInc = function(mana){
+    switch (mana) {
+      case "plain":
+        $scope.plains++;
+        break;
+      case "island":
+        $scope.islands++;
+        break;
+      case "swamp":
+        $scope.swamps++;
+        break;
+      case "mountain":
+        $scope.mountains++;
+        break;
+      case "forest":
+        $scope.forests++;
+        break;
+    }
+    $scope.landCount = $scope.plains + $scope.islands + $scope.swamps + $scope.mountains + $scope.forests;
+  };//End manaInc
+
+  $scope.manaDec = function(mana){
+    switch (mana) {
+      case "plain":
+        if ($scope.plains == 0){break;}
+        $scope.plains--;
+        break;
+      case "island":
+        if ($scope.islands == 0){break;}
+        $scope.islands--;
+        break;
+      case "swamp":
+        if ($scope.swamps == 0){break;}
+        $scope.swamps--;
+        break;
+      case "mountain":
+        if ($scope.mountains == 0){break;}
+        $scope.mountains--;
+        break;
+      case "forest":
+        if ($scope.forests == 0){break;}
+        $scope.forests--;
+        break;
+    }
+    $scope.landCount = $scope.plains + $scope.islands + $scope.swamps + $scope.mountains + $scope.forests;
+  };//End manaDec
 
   $scope.deckCard = function(e, cardIndex){
     var thisCard = e.currentTarget;
@@ -214,21 +341,54 @@ myApp.controller( 'playController', ['$scope', '$timeout', function($scope, $tim
     }
 
     //Determine if the card is from the mainboard or sideboard
-    // $timeout( function(){
-      if (thisCard.class == "mainBoard") {
+    for(var i=0; i<thisCard.classList.length; i++){
+      if (thisCard.classList[i] == "mainBoard") {
         //Move the card to the sideboard
         $scope.mySideboard.push($scope.myMainboard[cardIndex]);
         $scope.myMainboard.splice(cardIndex, 1);
-        } else {
+      } else if (thisCard.classList[i] == "sideBoard") {
           //Move the card to the mainboard
           $scope.myMainboard.push($scope.mySideboard[cardIndex]);
           $scope.mySideboard.splice(cardIndex, 1);
         }
-        console.log($scope.$$phase);
-        // $scope.$apply();
-        // return true;
-    // }, 1000);
+    }
+
+    document.getElementById('selectedCard').id = ""
     return true;
   };
 
 }]);
+
+myApp.controller( 'userModalController', ['$scope', function($scope){
+  $scope.userSeats = [];
+
+  socket.on('new seat', function(seats){
+    console.log(seats);
+    $scope.userSeats = seats;
+    $scope.userCount = seats.length;
+    $scope.$apply();
+  });
+
+  //bool will be false on a new user
+  socket.on('all seated', function(bool){
+    var userTest = bool.toString();
+    if (userTest == 'false'){
+      $scope.userSeats.push("User not seated");
+      $scope.$apply();
+    }
+  });
+
+}]);
+
+//for ng-right-click use
+myApp.directive('ngRightClick', function($parse) {
+    return function(scope, element, attrs) {
+        var fn = $parse(attrs.ngRightClick);
+        element.bind('contextmenu', function(event) {
+            scope.$apply(function() {
+                event.preventDefault();
+                fn(scope, {$event:event});
+            });
+        });
+    };
+});

@@ -13,29 +13,46 @@
 
 
     <main>
-      <div class="panel panel-primary" ng-controller='gameController' id='packSelection'>
+      <div ng-controller='gameController'>
 
-        <div class='panel-heading'>
-          <div class='panel-title'>Select packs to play with:</div>
+        <div class="panel panel-primary" id='packSelection'>
+
+          <div class='panel-heading'>
+            <div class='panel-title'>Select packs to play with:</div>
+          </div>
+
+          <div class='panelContent'>
+
+            <div id='statusAlert' class='alert alert-danger' role='alert'>Make sure each player has taken their seat!</div>
+            <div id='packAlert' class='alert alert-danger' role='alert'>Make sure you have selected each pack!</div>
+            <button style="margin: 10px" class="btn btn-primary" type="button" ng-click='getPacks()'>Make Packs</button>
+            <span>Player Status: <span id='status'>{{userStatus}}</span> ({{usersReady}}/{{totalUsers}})</span>
+
+            <select class='form-control' ng-model="packOne">
+              <option ng-repeat="set in dropDown">{{set}}</option>
+            </select>
+            <select class='form-control' ng-model="packTwo">
+              <option class='form-control' ng-repeat="set in dropDown">{{set}}</option>
+            </select>
+            <select class='form-control' ng-model="packThree">
+              <option ng-repeat="set in dropDown">{{set}}</option>
+            </select>
+
+          </div>
+
         </div>
 
-        <div class='panelContent'>
-          <div id='statusAlert' class='alert alert-danger' role='alert'>Make sure each player has taken their seat!</div>
-          <div id='packAlert' class='alert alert-danger' role='alert'>Make sure you have selected each pack!</div>
-          <button style="margin: 10px" class="btn btn-primary" type="button" ng-click='getPacks()'>Make Packs</button>
-          <span>Player Status: <span id='status'>{{userStatus}}</span></span>
 
-          <select class='form-control' ng-model="packOne">
-            <option ng-repeat="set in dropDown">{{set}}</option>
-          </select>
-          <select class='form-control' ng-model="packTwo">
-            <option class='form-control' ng-repeat="set in dropDown">{{set}}</option>
-          </select>
-          <select class='form-control' ng-model="packThree">
-            <option ng-repeat="set in dropDown">{{set}}</option>
-          </select>
+        <div class="panel panel-primary" id="welcome">
+          <div class="panel-heading">
+            <div class="panel-title">Welcome!</div>
+          </div>
+          <div class="panelContent">
+            <p>Please enter your name and take a seat at the table.  The draft will start once the room host is finished with the setup.  Thanks for playing on Henry's Draft!</p>
+          </div>
         </div>
 
+      <!-- End gameController -->
       </div>
 
       <div ng-controller='playController' id="playArea">
@@ -71,29 +88,44 @@
                 <div class="panel-title">Draft Complete!</div>
               </div>
               <div class='panelContent' style='margin: 15px; text-align: center;'>
-                <p>You've finished drafting!  Create your deck by moving cards to and from your sideboard and mainboard.  Once you have completed deckbuilding, click 'Submit Decklist' and your deck will be copied to your clipboard.  Then, paste the decklist into your favorite online magic application such as Cockatrice or Magic Workstation.  You can click 'Pairings' to see who you are paired with.<br/><br/><strong>Thanks for using Henry's Draft!</strong></p>
+                <p>You've finished drafting!  Create your deck by moving cards to and from your sideboard and mainboard.  Make sure to add basic lands to your deck!  Once you have completed deckbuilding, click 'Submit Decklist' and your deck will be copied to your clipboard.  Then, paste the decklist into your favorite online magic application such as Cockatrice or Magic Workstation.  You can click 'Pairings' to see who you are paired with.<br/><br/><strong>Thanks for using Henry's Draft!</strong></p>
                 <button style='margin: 15px;' type="button" class='btn btn-primary' ng-click='submitDecklist()'>Submit Decklist</button>
                 <button style='margin: 15px;' type="button" class='btn btn-info' ng-click='pairings()'>Pairings</button>
+              </div>
+            </div>
+
+            <div class="panel panel-success">
+              <div class="panel-heading">
+                <div class="panel-title">Basic Lands ({{landCount}}):</div>
+              </div>
+
+              <div class="panelContent">
+                <button type="button" class="mana" id="plain" ng-click='manaInc("plain")' ng-right-click='manaDec("plain")'>{{plains}}</button>
+                <button type="button" class="mana" id="island" ng-click='manaInc("island")' ng-right-click='manaDec("island")'>{{islands}}</button>
+                <button type="button" class="mana" id="swamp" ng-click='manaInc("swamp")' ng-right-click='manaDec("swamp")'>{{swamps}}</button>
+                <br/>
+                <button type="button" class="mana" id="mountain" ng-click='manaInc("mountain")' ng-right-click='manaDec("mountain")'>{{mountains}}</button>
+                <button type="button" class="mana" id="forest" ng-click='manaInc("forest")' ng-right-click='manaDec("forest")'>{{forests}}</button>
               </div>
 
             </div>
 
             <div class="panel panel-info">
               <div class="panel-heading">
-                <div class='panel-title'>Mainboard:</div>
+                <div class='panel-title'>Mainboard ({{myMainboard.length}}):</div>
               </div>
               <div class='panelContent'>
-                <img class='mainBoard' ng-click='deckCard($event, $index)' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{myCard.multiverseid}} + &type=card" ng-repeat="myCard in myMainboard track by $index"/>
+                <img class='mainBoard' ng-click='deckCard($event, $index)' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{myMainboardCard.multiverseid}} + &type=card" ng-repeat="myMainboardCard in myMainboard track by $index"/>
               </div>
             </div>
 
 
             <div class="panel panel-warning">
               <div class="panel-heading">
-                  <div class="panel-title">Sideboard:</div>
+                  <div class="panel-title">Sideboard ({{mySideboard.length}}):</div>
               </div>
               <div class='panelContent'>
-                <img class='sideBoard' ng-click='deckCard($event, $index)' ng-scr="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{myCard.multiverseid}} + &type=card" ng-repeat="myCard in mySideboard track by $index"/>
+                <img class='sideBoard' ng-click='deckCard($event, $index)' ng-src="http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid= + {{mySideboardCard.multiverseid}} + &type=card" ng-repeat="mySideboardCard in mySideboard track by $index"/>
               </div>
             </div>
 
@@ -118,7 +150,7 @@
 
         <div id='seating'>
           <div style="font-size: 1.5em" class="alert alert-warning" role="alert">Please take a seat:</div>
-          <input type="text" ng-model="username" placeholder="Player Name">
+          <input type="text" ng-keypress="nameEnter($event)" ng-model="username" placeholder="Player Name">
           <button class='btn btn-success' type="button" ng-click='takeSeat()'>Join</button>
         </div>
 
@@ -128,26 +160,29 @@
           <button id="userList" class='btn btn-info' data-toggle="modal" data-target="#userModal" type="button"><span class="glyphicon glyphicon-user" aria-hidden='true'></span></button>
         </div>
 
-        <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title" id="userModalLabel">Players <span class="badge">{{userCount}}</span></h4>
-              </div>
-              <div class="modal-body">
-                <ul>
-                  <li ng-repeat='user in userSeats track by $index'>{{user}}</li>
-                </ul>
-              </div>
+      </div>
+
+    <!-- End messageController -->
+    </div>
+
+    <div ng-controller="userModalController">
+      <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h4 class="modal-title" id="userModalLabel">Players <span class="badge">{{userCount}}</span></h4>
+            </div>
+            <div class="modal-body">
+              <ul>
+                <li ng-repeat='user in userSeats track by $index'>{{user}}</li>
+              </ul>
             </div>
           </div>
         </div>
-
       </div>
-
     </div>
 
 

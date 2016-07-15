@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 app.use( bodyParser.json() );
 var mongoose = require('mongoose');
 mongoose.connect('localhost:27017/mtgApp');
+var sha1 = require('sha-1');
 
 var mtgSchema = new  mongoose.Schema({
     name: String,
@@ -75,6 +76,8 @@ io.on('connection', function(socket){
   //Check to see if this is the first user to connect and enable pack selection
   if (connectedUsers.length == 1){
     io.to(connectedUsers[0].id).emit('initialize', true);
+  } else {
+    io.to(socket.id).emit('welcome', true);
   }
 
   //Let the chat know
@@ -111,6 +114,7 @@ io.on('connection', function(socket){
 
   socket.on('user seated', function(userName){
     var userSeats = [];
+    io.emit('chat message', userName + " has taken a seat.");
     for (var i=0; i<connectedUsers.length; i++){
       if (socket.id == connectedUsers[i].id){
         connectedUsers[i].name = userName;
@@ -210,6 +214,16 @@ io.on('connection', function(socket){
     }
 
   });
+
+  // socket.on('hash', deck){
+  //   //SHA-1 hash
+  //   deck = sha1(deck);
+  //   //Keep the first 5 bytes
+  //   deck = deck.substring(0,10);
+  //   //convert to base32
+  //   console.log(deck);
+  //
+  // });
 
 });//End socket connect
 
