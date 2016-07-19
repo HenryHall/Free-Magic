@@ -7,12 +7,14 @@
     <link rel="stylesheet" href="style.css" media="screen" title="no title" charset="utf-8">
   </head>
   <body>
-    <div class="page-header">
-      <h1>Henry's Draft <small>FREE MAGIC!</small></h1>
-    </div>
-
 
     <main>
+
+      <div class="page-header">
+        <h1>Henry's Draft <small>FREE MAGIC!</small></h1>
+      </div>
+
+
       <div ng-controller='gameController'>
 
         <div class="panel panel-primary" id='packSelection'>
@@ -89,8 +91,8 @@
               </div>
               <div class='panelContent' style='margin: 15px; text-align: center;'>
                 <p>You've finished drafting!  Create your deck by moving cards to and from your sideboard and mainboard.  Make sure to add basic lands to your deck!  Once you have completed deckbuilding, click 'Submit Decklist' and your deck will be copied to your clipboard.  Then, paste the decklist into your favorite online magic application such as Cockatrice or Magic Workstation.  You can click 'Pairings' to see who you are paired with.<br/><br/><strong>Thanks for using Henry's Draft!</strong></p>
-                <button style='margin: 15px;' type="button" class='btn btn-primary' ng-click='submitDecklist()'>Submit Decklist</button>
-                <button style='margin: 15px;' type="button" class='btn btn-info' ng-click='pairings()'>Pairings</button>
+                <button style='margin: 15px;' type="button" class='btn btn-primary' data-toggle="modal" data-target="#deckModal" ng-click='submitDecklist()'>Submit Decklist</button>
+                <button style='margin: 15px;' type="button" class='btn btn-info' data-toggle="modal" data-target="#pairingsModal">Pairings</button>
               </div>
             </div>
 
@@ -131,6 +133,46 @@
 
           </div>
 
+          <div class="modal fade" id="deckModal" tabindex="-1" role="dialog" aria-labelledby="deckModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                  <h4 class="modal-title" id="userModalLabel">Your Deck:</h4>
+                </div>
+                <div class="modal-body">
+                  <h5>Deck Hash: {{deckHash}}</h5>
+                  <button type="button" class='btn btn-info btn-lg' ng-click="clipboard()">Copy list to clipboard</button>
+                  <textarea id="deckTextarea">
+                    {{deckList}}
+                  </textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="modal fade" id="pairingsModal" tabindex="-1" role="dialog" aria-labelledby="pairingsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                  <h4 class="modal-title" id="pairingModalLabel">Pairings:</h4>
+                </div>
+                <div class="modal-body">
+                  <h3>Round one:</h3>
+                  <ul>
+                    <li ng-repeat='player in pairings'><strong>Player: </strong>{{player.name}}, <strong>Opponent: </strong>{{player.opponent}}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
       <!-- End playController -->
       </div>
 
@@ -149,8 +191,8 @@
       <div id='msgControls'>
 
         <div id='seating'>
-          <div style="font-size: 1.5em" class="alert alert-warning" role="alert">Please take a seat:</div>
-          <input type="text" ng-keypress="nameEnter($event)" ng-model="username" placeholder="Player Name">
+          <div class="alert alert-warning" role="alert">Please take a seat:</div>
+          <input type="text" ng-keypress="nameEnter($event)" ng-model="username" placeholder="Player Name" autofocus='true'>
           <button class='btn btn-success' type="button" ng-click='takeSeat()'>Join</button>
         </div>
 

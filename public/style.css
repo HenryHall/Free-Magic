@@ -47,8 +47,10 @@ textarea {
   display: inline;
   position: fixed;
   width: 25vw;
+  height: 80vh;
   float: right;
   margin: 2vw;
+  margin-top: 10vh;
   border: 2px solid black;
   border-radius: 10px;
   background-color: #FFF;
@@ -56,10 +58,11 @@ textarea {
 
 .alert-warning {
   margin-bottom: 0px;
+  font-size: 1.25em;
 }
 
 #chatLog {
-  height:65vh;
+  height:80%;
   width:100%;
   border: 1px solid black;
   overflow-y: auto;
@@ -92,6 +95,11 @@ textarea {
 
 #selectedCard {
   border: 5px solid #00ac0c;
+}
+
+#deckTextarea {
+  width: 100%;
+  margin-top: 15px;
 }
 
 .mana {

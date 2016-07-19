@@ -4,7 +4,6 @@ var status= 'false';
 var socket = io();
 var myApp=angular.module( 'myApp', [] );
 
-
 myApp.controller( 'gameController', ['$scope', '$http', function($scope, $http){
 
   $scope.userStatus = "Not Ready";
@@ -18,6 +17,7 @@ myApp.controller( 'gameController', ['$scope', '$http', function($scope, $http){
 
   socket.on('welcome', function(){
     document.getElementById('welcome').style.display = "block";
+    // socket.emit('test pair', true);
   });
 
   socket.on('all seated', function(bool){
@@ -149,7 +149,6 @@ myApp.controller( 'messageController', ['$scope', function($scope){
 
 
   socket.on('chat message', function(msg){
-    console.log("Here");
     $scope.messageLog.push(msg);
     $scope.$apply();
     document.getElementById('chatLog').scrollTop = document.getElementById('chatLog').scrollHeight;
@@ -170,6 +169,8 @@ myApp.controller( 'playController', ['$scope', function($scope){
   $scope.mountains = 0;
   $scope.forests = 0;
   $scope.landCount = 0;
+
+  $scope.deckList;
 
 
   socket.on('packEmit', function(pack){
@@ -192,6 +193,13 @@ myApp.controller( 'playController', ['$scope', function($scope){
     $scope.myMainboard = $scope.myPicks;
     $scope.$apply();
     return true;
+  });
+
+  socket.on('pairings', function(pairings){
+    for(var i=0; i<pairings.length; i++){
+      console.log("Name:", pairings[i].name, "Opponent:", pairings[i].opponent);
+      $scope.pairings = pairings;
+    }
   });
 
   $scope.pickCard = function(e, cardIndex){
@@ -239,8 +247,8 @@ myApp.controller( 'playController', ['$scope', function($scope){
 
   //Hash the decklist
   $scope.submitDecklist = function(){
-    var mainboardToHash;
-    var sideboardToHash;
+    var mainboardToHash = "";
+    var sideboardToHash = "";
     var finalToHash;
 
     for (var i=0; i<$scope.myMainboard.length; i++){
@@ -252,13 +260,13 @@ myApp.controller( 'playController', ['$scope', function($scope){
     }
 
     for (var i=0; i<$scope.plains; i++){
-      mainboardToHash += "plain;";
+      mainboardToHash += "plains;";
     }
     for (var i=0; i<$scope.islands; i++){
-      mainboardToHash += "islands;";
+      mainboardToHash += "island;";
     }
     for (var i=0; i<$scope.swamps; i++){
-      mainboardToHash += "swamps;";
+      mainboardToHash += "swamp;";
     }
     for (var i=0; i<$scope.mountains; i++){
       mainboardToHash += "mountain;";
@@ -271,15 +279,16 @@ myApp.controller( 'playController', ['$scope', function($scope){
 
     //Remove the last ";"
     finalToHash = finalToHash.substring(0, finalToHash.length-1);
-    finalToHash.utf8Encode();
+    $scope.deckList = finalToHash;
     console.log(finalToHash);
 
-    // socket.emit('hash', finalToHash);
+    socket.emit('hash', finalToHash);
   };
 
-  // socket.on('received hash', newHash){
-  //
-  // }
+  socket.on('send hash', function(newHash){
+    $scope.deckHash = newHash;
+    $scope.$apply();
+  });
 
 
   $scope.manaInc = function(mana){
@@ -363,7 +372,6 @@ myApp.controller( 'userModalController', ['$scope', function($scope){
   $scope.userSeats = [];
 
   socket.on('new seat', function(seats){
-    console.log(seats);
     $scope.userSeats = seats;
     $scope.userCount = seats.length;
     $scope.$apply();

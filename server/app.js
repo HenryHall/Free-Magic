@@ -176,6 +176,41 @@ io.on('connection', function(socket){
     return false;
   });
 
+  // socket.on('test pair', function(){
+  //   console.log("In test pair");
+  //   //Assign pairings
+  //   var randPlayer;
+  //   var pairings = [];
+  //
+  //   //create an array of all players
+  //   for(var i=0; i<connectedUsers.length; i++){
+  //     pairings.push({name: connectedUsers[i].name, opponent: null});
+  //   }
+  //
+  //   //If there is an odd number of players, assign a bye
+  //   if(pairings.length%2 !== 0){
+  //     console.log("There was a BYE");
+  //     var rand = Math.floor(Math.random() * (pairings.length - 1) + 1);
+  //     randPlayer = {name: pairings[rand].name, opponent: "BYE"};
+  //     pairings.splice(rand, 1);
+  //   }
+  //
+  //   //Assign Opponents
+  //   for(var i=0; i<pairings.length/2; i++){
+  //     pairings[i].opponent = pairings[(pairings.length/2)+i].name;
+  //     pairings[(pairings.length/2)+i].opponent = pairings[i].name;
+  //   }
+  //
+  //   //Add randPlayer back if != undefined
+  //   if(randPlayer !== undefined){
+  //     pairings.push(randPlayer);
+  //   }
+  //
+  //   console.log(pairings);
+  //   io.emit('pairings', pairings);
+  //   return true;
+  // });
+
   socket.on('pack done', function(){
     //Set this users status to "Next Pack"
     for (var i=0; i<connectedUsers.length; i++){
@@ -190,40 +225,255 @@ io.on('connection', function(socket){
       console.log("All Packs Drafted!");
       io.emit('draft done', true);
 
-    } else {
-      //Continue
-      //See if all users are ready for Next Pack
-      var usersReady = 0;
-      for (var i=0; i<connectedUsers.length; i++){
-      if (connectedUsers[i].status == "Next Pack"){
-          usersReady++;
-        }
+      //Assign pairings
+      var randPlayer;
+      var pairings = [];
+
+      //create an array of all players
+      for(var i=0; i<connectedUsers.length; i++){
+        pairings.push({name: connectedUsers[i].name, opponent: null});
       }
 
-      //If all users are ready for Next Pack
-      if (usersReady==connectedUsers.length){
-        //Reverse pack direction
-        connectedUsers.reverse();
-        //Send packs to the clients
-        for(var i=0; i<connectedUsers.length; i++){
-          io.to(connectedUsers[i].id).emit('packEmit', allPacks[0][i]);
+      //If there is an odd number of players, assign a bye
+      if(pairings.length%2 !== 0){
+        //Make sure there is more than one player
+        if(pairings.length == 1){
+          io.emit('pairings', pairings);
+          return true;
         }
-        allPacks.splice(0,1);
+        console.log("There was a BYE");
+        var rand = Math.floor(Math.random() * (pairings.length - 1) + 1);
+        randPlayer = {name: pairings[rand].name, opponent: "BYE"};
+        pairings.splice(rand, 1);
       }
 
+      //Assign Opponents
+      for(var i=0; i<pairings.length/2; i++){
+        pairings[i].opponent = pairings[(pairings.length/2)+i].name;
+        pairings[(pairings.length/2)+i].opponent = pairings[i].name;
+      }
+
+      //Add randPlayer back if != undefined
+      if(randPlayer !== undefined){
+        pairings.push(randPlayer);
+      }
+
+      console.log(pairings);
+      io.emit('pairings', pairings);
+      return true;
+
+    }//End draft done
+
+    //Draft is not done
+    //See if all users are ready for Next Pack
+    var usersReady = 0;
+    for (var i=0; i<connectedUsers.length; i++){
+    if (connectedUsers[i].status == "Next Pack"){
+        usersReady++;
+      }
+    }
+
+    //If all users are ready for Next Pack
+    if (usersReady==connectedUsers.length){
+      //Reverse pack direction
+      connectedUsers.reverse();
+      //Send packs to the clients
+      for(var i=0; i<connectedUsers.length; i++){
+        io.to(connectedUsers[i].id).emit('packEmit', allPacks[0][i]);
+      }
+      allPacks.splice(0,1);
     }
 
   });
 
-  // socket.on('hash', deck){
-  //   //SHA-1 hash
-  //   deck = sha1(deck);
-  //   //Keep the first 5 bytes
-  //   deck = deck.substring(0,10);
-  //   //convert to base32
-  //   console.log(deck);
-  //
-  // });
+  socket.on('hash', function(deck){
+    //SHA-1 hash
+    deck = sha1(deck);
+    //Keep the first 5 bytes
+    deck = deck.substring(0,10);
+    //convert to base32
+    console.log(deck);
+
+    //Start /u/Fizztastik's conversion code-- Thanks!
+    //Convert each character of the Hex hash to binary
+    var binary = '';
+    for (i = 0; i < 10; i++) {
+        switch(deck.substr(i,1))
+        {
+            case "0":
+                binary+="0000";
+                break;
+            case "1":
+                binary+="0001";
+                break;
+            case "2":
+                binary+="0010";
+                break;
+            case "3":
+                binary+="0011";
+                break;
+            case "4":
+                binary+="0100";
+                break;
+            case "5":
+                binary+="0101";
+                break;
+            case "6":
+                binary+="0110";
+                break;
+            case "7":
+                binary+="0111";
+                break;
+            case "8":
+                binary+="1000";
+                break;
+            case "9":
+                binary+="1001";
+                break;
+            case "A":
+            case "a":
+                binary+="1010";
+                break;
+            case "B":
+            case "b":
+                binary+="1011";
+                break;
+            case "C":
+            case "c":
+                binary+="1100";
+                break;
+            case "D":
+            case "d":
+                binary+="1101";
+                break;
+            case "E":
+            case "e":
+                binary+="1110";
+                break;
+            case "F":
+            case "f":
+                binary+="1111";
+                break;
+            default:
+                break;
+        }
+    }
+
+    console.log('after binary', binary);
+
+    //Convert each block of 5 bit to base32
+    var finalhash = '';
+    for (i = 0; i < 8; i++) {
+      switch(binary.substr(i*5,5))
+        {
+            case "00000":
+                finalhash+="0";
+                break;
+            case "00001":
+                finalhash+="1";
+                break;
+            case "00010":
+                finalhash+="2";
+                break;
+            case "00011":
+                finalhash+="3";
+                break;
+            case "00100":
+                finalhash+="4";
+                break;
+            case "00101":
+                finalhash+="5";
+                break;
+            case "00110":
+                finalhash+="6";
+                break;
+            case "00111":
+                finalhash+="7";
+                break;
+            case "01000":
+                finalhash+="8";
+                break;
+            case "01001":
+                finalhash+="9";
+                break;
+            case "01010":
+                finalhash+="A";
+                break;
+            case "01011":
+                finalhash+="B";
+                break;
+            case "01100":
+                finalhash+="C";
+                break;
+            case "01101":
+                finalhash+="D";
+                break;
+            case "01110":
+                finalhash+="E";
+                break;
+            case "01111":
+                finalhash+="F";
+                break;
+            case "10000":
+                finalhash+="G";
+                break;
+            case "10001":
+                finalhash+="H";
+                break;
+            case "10010":
+                finalhash+="I";
+                break;
+            case "10011":
+                finalhash+="J";
+                break;
+            case "10100":
+                finalhash+="K";
+                break;
+            case "10101":
+                finalhash+="L";
+                break;
+            case "10110":
+                finalhash+="M";
+                break;
+            case "10111":
+                finalhash+="N";
+                break;
+            case "11000":
+                finalhash+="O";
+                break;
+            case "11001":
+                finalhash+="P";
+                break;
+            case "11010":
+                finalhash+="Q";
+                break;
+            case "11011":
+                finalhash+="R";
+                break;
+            case "11100":
+                finalhash+="S";
+                break;
+            case "11101":
+                finalhash+="T";
+                break;
+            case "11110":
+                finalhash+="U";
+                break;
+            case "11111":
+                finalhash+="V";
+                break;
+            default:
+                break;
+        }
+      } //End /u/Fizztastik's conversion code
+
+    //Return the hash
+    console.log('final hash', finalhash);
+
+
+    socket.emit('send hash', finalhash);
+
+  });
 
 });//End socket connect
 
