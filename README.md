@@ -5,6 +5,10 @@
 
   Free Magic is a tool I created to draft Magic: The Gathering cards over the internet.  Using Socket.io to connect users, anywhere from 1-10 players can play a simulated Magic draft together.  [What is a booster draft?](http://magic.wizards.com/en/articles/archive/lo/basics-booster-draft-2014-11-03)
   
+##How does it work?
+
+  I created a Mongo database of every card to date using a JSON from MTGJSON.com.  Once the game loads, the names of the sets are sent to the room owner's client to be selected.  Once the sets are selected, the server checks the database for information used to search Wizard of the Coast's Gatherer database.  Once the packs of cards are randomized on my server, I am able to pull images from Gatherer.
+  
 ##Using Free Magic
 ![Into to Free Magic](https://raw.githubusercontent.com/HenryHall/Free-Magic/master/images/first.png)
 
@@ -38,7 +42,3 @@ Congratz!  You have just finished your first draft on Free Magic.  Now you can f
 ##Why isn't Free Magic live?
 
   I am not currently hosting Free Magic anywhere because although I would love Magic: the Gathering to be free, I must respect Wizards of the Coast's IP.  This application was a project for school and is not indented for any other use, sorry!
-  
-##How does it work?
-
-  I created a Mongo database of every card to date using a JSON from MTGJSON.com.  Once the game loads, the names of the sets are sent to the room owner's client to be selected.  Once the sets are selected, the server checks the database for information used to search Wizard of the Coast's Gatherer database.  Once the packs of cards are randomized on my server, I am able to pull images from Gatherer.
